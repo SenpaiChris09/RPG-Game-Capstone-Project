@@ -4,8 +4,8 @@ let player = {
     maxHp: 100,
     atk: 10,
     multiplier: 1.0,
-    critChance: 0.25,
-    blockChance: 0.0, // Base starts at 0, scales with level/items
+    critChance: Math.min(0.02, 1.0),
+    blockChance: Math.min(0.02, 1.0), // Base starts at 0, scales with level/items
     level: 1,
     coins: 0,
     inventory: []
@@ -24,6 +24,7 @@ const menuScreen = document.getElementById('menu');
 const gameScreen = document.getElementById('game');
 const shopScreen = document.getElementById('shop');
 const highScoreScreen = document.getElementById('high-score');
+const creditsScreen = document.getElementById('credits'); // New reference for credits
 const combatLog = document.getElementById('combat-log');
 const playerImg = document.getElementById('player-img');
 const enemyImg = document.getElementById('enemy-img');
@@ -45,14 +46,55 @@ const enemyImages = [
 
 // Updated generateEnemy with scaling
 function generateEnemy(level) {
-    const hpScaling = 50 + 10 * level + Math.floor(level * level * 0.1); // Slower HP growth
-    const atkScaling = 5 + Math.floor(level * 1.5); // Reduced ATK growth
-    const multiplierScaling = 0.9 + Math.min(0.02 * level, 1.0); // Caps at 1.9x
-    return {
+    const hpScaling = 75 + 5 * level + Math.floor(level * level * 0.1);
+    const atkScaling = 5 + Math.floor(level * 1.5);
+    const multiplierScaling = 0.9 + Math.min(0.02 * level, 1.0);
+    
+    const enemy = {
         hp: hpScaling,
         atk: atkScaling,
-        multiplier: multiplierScaling
+        multiplier: multiplierScaling,
+        critChance: 0, // Default 0% below level 50
+        blockChance: 0 // Default 0% below level 50
     };
+
+    // Add random crit and block chances at level 50+
+    if (level < 10) {
+        enemy.critChance = (Math.floor(Math.random() * 5) + 1) / 100; // 1% to 5% (0.01 to 0.05)
+        enemy.blockChance = (Math.floor(Math.random() * 5) + 1) / 100; // 1% to 5% (0.01 to 0.05)
+    } else if (level >= 10) {
+        enemy.critChance = (Math.floor(Math.random() * 10) + 5) / 100; // 5% to 10% (0.05 to 0.10)
+        enemy.blockChance = (Math.floor(Math.random() * 10) + 5) / 100; // 5% to 10% (0.05 to 0.10)
+    } else if (level >= 20) {
+        enemy.critChance = (Math.floor(Math.random() * 15) + 10) / 100; // 10% to 15% (0.10 to 0.15)
+        enemy.blockChance = (Math.floor(Math.random() * 15) + 10) / 100; // 10% to 15% (0.10 to 0.15)
+    } else if (level >= 30) {
+        enemy.critChance = (Math.floor(Math.random() * 20) + 15) / 100; // 15% to 20% (0.15 to 0.20)
+        enemy.blockChance = (Math.floor(Math.random() * 20) + 15) / 100; // 15% to 20% (0.15 to 0.20)
+    } else if (level >= 40) {
+        enemy.critChance = (Math.floor(Math.random() * 25) + 20) / 100; // 20% to 25% (0.20 to 0.25)
+        enemy.blockChance = (Math.floor(Math.random() * 25) + 20) / 100; // 20% to 25% (0.20 to 0.25)
+    } else if (level >= 50) {
+        enemy.critChance = (Math.floor(Math.random() * 30) + 25) / 100; // 25% to 30% (0.25 to 0.30)
+        enemy.blockChance = (Math.floor(Math.random() * 30) + 25) / 100; // 25% to 30% (0.25 to 0.30)
+    } else if (level >= 60) {
+        enemy.critChance = (Math.floor(Math.random() * 35) + 30) / 100; // 30% to 35% (0.30 to 0.35)
+        enemy.blockChance = (Math.floor(Math.random() * 35) + 30) / 100; // 30% to 35% (0.30 to 0.35)
+    } else if (level >= 70) {
+        enemy.critChance = (Math.floor(Math.random() * 40) + 35) / 100; // 35% to 40% (0.35 to 0.40)
+        enemy.blockChance = (Math.floor(Math.random() * 40) + 35) / 100; // 35% to 40% (0.35 to 0.40)
+    } else if (level >= 80) {
+        enemy.critChance = (Math.floor(Math.random() * 45) + 4) / 100; // 4% to 45% (0.40 to 0.45)
+        enemy.blockChance = (Math.floor(Math.random() * 45) + 4) / 100; // 4% to 45% (0.40 to 0.45)
+    } else if (level >= 90) {
+        enemy.critChance = (Math.floor(Math.random() * 50) + 45) / 100; // 45% to 50% (0.45 to 0.50)
+        enemy.blockChance = (Math.floor(Math.random() * 50) + 45) / 100; // 45% to 50% (0.45 to 0.50)
+    } else if (level >= 100) {
+        enemy.critChance = (Math.floor(Math.random() * 55) + 50) / 100; // 50% to 55% (0.50 to 0.55)
+        enemy.blockChance = (Math.floor(Math.random() * 55) + 50) / 100; // 50% to 55% (0.50 to 0.55)
+    }
+
+    return enemy;
 }
 
 
@@ -80,10 +122,18 @@ function showHighScore() {
     switchScreen(highScoreScreen);
 }
 
+function showCredits() {
+    switchScreen(creditsScreen);
+    const creditsContent = document.getElementById('credits-content');
+    creditsContent.style.animation = 'none'; // Reset animation
+    void creditsContent.offsetWidth; // Trigger reflow
+    creditsContent.style.animation = 'rollUp 15s linear forwards'; // Reapply animation
+}
+
 function backToMenu() {
     switchScreen(menuScreen);
-    combatLogQueue = []; // Clear queue when leaving game
-    fullCombatHistory = []; // Clear history
+    combatLogQueue = [];
+    fullCombatHistory = [];
 }
 
 // Game Logic
@@ -93,8 +143,8 @@ function resetPlayerStats() {
         maxHp: 100,
         atk: 10, // Base attack
         multiplier: 1.0, // Base damage multiplier
-        critChance: 0.25, // Base crit chance
-        blockChance: 0.1, // Base block chance
+        critChance: Math.min(0.02, 1.0), // Base crit chance (max 1%)
+        blockChance: Math.min(0.02, 1.0), // Base block chance
         level: 1,
         coins: 0,
         inventory: []
@@ -107,10 +157,12 @@ function switchScreen(screen) {
     gameScreen.style.display = 'none';
     shopScreen.style.display = 'none';
     highScoreScreen.style.display = 'none';
+    creditsScreen.style.display = 'none'; // Hide credits screen
     screen.style.display = 'block';
     updateStats();
     if (screen === shopScreen) updateShopPrices(); // Update prices when shop opens
 }
+
 
 function updateStats() {
     document.getElementById('player-hp').textContent = player.hp;
@@ -137,6 +189,24 @@ function updateStats() {
     if (shopScreen.style.display === 'block') {
         document.getElementById('shop-coins').textContent = player.coins;
         updateShopPrices(); // Update price colors
+    }
+
+    // Tooltip stats for player
+    document.getElementById('player-max-hp-info').textContent = player.maxHp;
+    document.getElementById('player-atk-info').textContent = player.atk;
+    document.getElementById('player-multiplier-info').textContent = player.multiplier.toFixed(3) + 'x';
+    document.getElementById('player-crit-info').textContent = (player.critChance * 100).toFixed(1) + '%';
+    document.getElementById('player-block-info').textContent = (player.blockChance * 100).toFixed(1) + '%';
+    const baseDodgeChance = Math.min(0.018 + player.level * 0.002, 0.3); // From enemyTurn()
+    document.getElementById('player-dodge-info').textContent = (baseDodgeChance * 100).toFixed(1) + '%';
+
+    // Tooltip stats for enemy (no dodge chance)
+    if (enemy) {
+        document.getElementById('enemy-max-hp-info').textContent = Math.floor(50 + 5 * player.level + player.level * player.level * 0.1); // From generateEnemy()
+        document.getElementById('enemy-atk-info').textContent = enemy.atk;
+        document.getElementById('enemy-multiplier-info').textContent = enemy.multiplier.toFixed(3) + 'x';
+        document.getElementById('enemy-crit-info').textContent = (enemy.critChance * 100).toFixed(0) + '%';
+        document.getElementById('enemy-block-info').textContent = (enemy.blockChance * 100).toFixed(0) + '%';
     }
 }
 
@@ -177,12 +247,12 @@ function attack() {
             hideEffect(enemyEffect);
         }, 2000);
     }
-    if (Math.random() < 0.1) {
+    if (Math.random() < enemy.blockChance) { // Updated to use enemy.blockChance
         damage = Math.floor(damage / 2);
-        logMessage(`<b>Enemy blocked your attack!</b> You deal <b>${damage}</b> damage.`);
+        logMessage(`<b>Enemy blocked your attack!</b> Enemy blocks with ${(enemy.blockChance * 100).toFixed(0)}% chance. Deals <b>${damage}</b> damage.`);
         enemyImg.style.animation = 'scaleUp 0.5s linear';
         enemyImg.classList.add('glow-yellow');
-        showEffect(enemyEffect, 'block'); // Show block GIF
+        showEffect(enemyEffect, 'block');
         setTimeout(() => {
             enemyImg.style.animation = 'moveEnemy 2s alternate';
             enemyImg.classList.remove('glow-yellow');
@@ -201,18 +271,42 @@ function attack() {
         logMessage("Enemy defeated!");
         dropLoot();
         player.level += 1;
-        player.maxHp += 10;
+
+        if (player.level < 10) {
+            player.maxHp += 10;
+        } else if (player.level >= 10 && player.level < 20) {
+            player.maxHp += 20;
+        } else if (player.level >= 20 && player.level < 30) {
+            player.maxHp += 40;
+        } else if (player.level >= 30 && player.level < 40) {
+            player.maxHp += 60;
+        } else if (player.level >= 40 && player.level < 50) {
+            player.maxHp += 80;
+        } else if (player.level >= 50 && player.level < 60) {
+            player.maxHp += 100;
+        } else if (player.level >= 60 && player.level < 70) {
+            player.maxHp += 120;
+        } else if (player.level >= 70 && player.level < 80) {
+            player.maxHp += 140;
+        } else if (player.level >= 80 && player.level < 90) {
+            player.maxHp += 160;
+        } else if (player.level >= 90 && player.level < 100) {
+            player.maxHp += 180;
+        } else if (player.level >= 100) {
+            player.maxHp += 200;
+        }
+        
         player.hp = player.maxHp;
-        logMessage("Max HP Increased by 10! Healed to full HP.");
+        logMessage("Max HP Increased! Healed to full HP.");
         playerImg.classList.add('glow-green');
         setTimeout(() => playerImg.classList.remove('glow-green'), 500);
 
         // Randomly boost 3 stats
         const statUpgrades = [
             { stat: 'atk', value: 1 + (Math.floor(Math.random() * 3)) , message: "ATK Up! ⚔️" },
-            { stat: 'multiplier', value: 0.01 + (Math.floor(Math.random()*100)/1000), message: "Multiplier up! 💎" },
-            { stat: 'critChance', value: 0.01 + (Math.floor(Math.random()*100)/1000), message: "Crit Chance up! ⚜️" },
-            { stat: 'blockChance', value: 0.01 + (Math.floor(Math.random()*100)/1000), message: "Block Chance up! 🛡️" }
+            { stat: 'multiplier', value: (Math.floor(Math.random()*100)/1500), message: "Multiplier up! 💎" },
+            { stat: 'critChance', value: Math.min(player.level * 0.002, 0.5), message: "Crit Chance up! ⚜️" },
+            { stat: 'blockChance', value: Math.min(player.level * 0.002, 0.5), message: "Block Chance up! 🛡️" }
         ];
 
         // Shuffle and pick 3 random stats
@@ -234,7 +328,7 @@ function attack() {
 }
 
 function enemyTurn(dodged = false) {
-    const baseDodgeChance = Math.min(0.1 + player.level * 0.002, 0.3); // 10% + 0.2% per level, max 30%
+    const baseDodgeChance = Math.min(0.018 + player.level * 0.002, 0.3); // 10% + 0.2% per level, max 30%
     
     if (dodged) {
         logMessage("Enemy swings but misses completely!");
@@ -244,7 +338,21 @@ function enemyTurn(dodged = false) {
     }
 
     let enemyDamage = Math.floor(enemy.atk * enemy.multiplier);
+    let critMultiplier = Math.random() < enemy.critChance ? 2 : 1; // Enemy crit chance
+    enemyDamage = Math.floor(enemyDamage * critMultiplier);
     let damageTaken = true;
+
+    if (critMultiplier > 1) {
+        logMessage(`<b>Enemy lands a critical hit!</b> Crit chance: ${(enemy.critChance * 100).toFixed(0)}%.`);
+        playerImg.style.animation = 'vibrate 0.5s linear';
+        playerImg.classList.add('glow-red');
+        showEffect(playerEffect, 'crit');
+        setTimeout(() => {
+            playerImg.style.animation = 'movePlayer 2s alternate';
+            playerImg.classList.remove('glow-red');
+            hideEffect(playerEffect);
+        }, 2000);
+    }
 
     // Check dodge first (independent of block)
     if (Math.random() < baseDodgeChance) {
@@ -397,7 +505,28 @@ function hideEffect(element) {
 }
 
 function dropLoot() {
-    const coinsDropped = Math.floor(Math.random() * 11) + 5;
+    let coinsDropped = Math.floor(Math.random() * 11) + 5;
+    if (player.level >= 10 && player.level < 20) {
+        coinsDropped += 5;
+    } else if (player.level >= 20 && player.level < 30) {
+        coinsDropped += 10;
+    } else if (player.level >= 30 && player.level < 40) {
+        coinsDropped += 15;
+    } else if (player.level >= 40 && player.level < 50) {
+        coinsDropped += 20;
+    } else if (player.level >= 50 && player.level < 60) {
+        coinsDropped += 25;
+    } else if (player.level >= 60 && player.level < 70) {
+        coinsDropped += 30;
+    } else if (player.level >= 70 && player.level < 80) {
+        coinsDropped += 35;
+    } else if (player.level >= 80 && player.level < 90) {
+        coinsDropped += 40;
+    } else if (player.level >= 90 && player.level < 100) {
+        coinsDropped += 45;
+    } else if (player.level >= 100) {
+        coinsDropped += 50;
+    }
     player.coins += coinsDropped;
     logMessage(`Enemy dropped ${coinsDropped} coins!`);
 
@@ -551,3 +680,4 @@ function updateHighScore() {
         localStorage.setItem('highScore', highScore);
     }
 }
+

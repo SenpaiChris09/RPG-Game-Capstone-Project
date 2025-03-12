@@ -65,6 +65,48 @@ body {
     animation-play-state: paused;
 }
 
+/* Credits screen styling */
+#credits {
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    position: fixed; /* Full screen */
+    width: 25vw; /* Full viewport width */
+    height: 65vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 10; /* Above other elements */
+}
+
+#credits-content {
+    position: relative;
+    bottom: -100%; /* Start below */
+    width: auto;
+    max-width: 50vw; /* Limit content width */
+    text-align: center;
+    padding: 20px;
+    animation: rollUp 15s linear forwards; /* Slower animation */
+}
+
+#credits-content h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+#credits-content p {
+    margin: 15px 0;
+    font-size: 16px;
+}
+
+#credits-content strong {
+    color: #FFD700;
+}
+
 #shop-table {
     width: 400px;
     background-color: rgba(240, 248, 255, 0.95);
@@ -166,18 +208,19 @@ body {
     margin-bottom: 10px; /* Space between groups */
 }
 
+/* Existing button styles (ensure consistency) */
 button {
-    padding: 10px 20px; /* Slightly smaller padding for uniformity */
-    margin-bottom: 10px;
-    font-size: 14px; /* Consistent font size */
+    padding: 10px 20px;
+    font-size: 14px;
     cursor: pointer;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     transition: transform 0.2s ease, background-color 0.2s ease;
-    width: 100%; /* Buttons fill their grid cell */
-    box-sizing: border-box; /* Include padding in width */
+    width: 100%;
+    box-sizing: border-box;
+    margin: 5px 0; /* Space buttons vertically */
 }
 
 button:hover {
@@ -199,6 +242,44 @@ button:hover {
 
 #stats {
     margin-bottom: 20px;
+    position: relative; /* Ensure tooltips position relative to stats */
+}
+
+/* Tooltip styling */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: 5px; /* Space from stats text */
+    font-size: 16px; /* Size of ℹ icon */
+    color: #4CAF50; /* Match your theme */
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px; /* Wide enough for stats */
+    background-color: rgba(0, 0, 0, 0.9); /* Dark background */
+    color: #fff; /* White text */
+    text-align: left;
+    padding: 10px;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 20; /* Above other elements */
+    top: 125%; /* Below the ℹ icon */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible; /* Show on hover */
+}
+
+/* Ensure stats text doesn’t overlap */
+.player, .enemy {
+    position: relative;
+    padding-right: 20px; /* Space for tooltip icon */
 }
 
 #combat-log {
@@ -406,4 +487,10 @@ button:hover {
 @keyframes coinDrop {
     0% { transform: translateY(0); opacity: 1; }
     100% { transform: translateY(-50px); opacity: 0; }
+}
+
+/* Roll-up animation */
+@keyframes rollUp {
+    0% { bottom: -100%; } /* Start below */
+    100% { bottom: 0%; } /* Stop at the bottom */
 }

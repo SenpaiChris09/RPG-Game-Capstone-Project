@@ -13,13 +13,55 @@
         <button onclick="startGame()">Start Game</button>
         <button onclick="continueGame()">Continue</button>
         <button onclick="showHighScore()">High Score</button>
+        <button onclick="showCredits()">Credits</button> <!-- New button -->
+    </div>
+        <!-- New credits screen -->
+    <div id="credits" class="screen" style="display: none;">
+        <div id="credits-content" class="credits-roll">
+            <h2>Game Credits</h2>
+            <p><strong>Lead Developer:</strong> Christian G. Cullados - The mastermind behind Wanderer's Ascent!</p>
+            <p><strong>Design & Coding:</strong> Christian G. Cullados - Bringing the adventure to life.</p>
+            <p><strong>Testing:</strong> Christian G. Cullados - Ensuring every enemy falls just right.</p>
+            <p><strong>Inspiration:</strong> Countless cups of coffee and late-night coding sessions.</p>
+            <p><strong>Special Thanks:</strong> xAI’s Grok - For the assist in refining this epic journey!</p>
+            <p>Thank you for playing Wanderer's Ascent!</p>
+        </div>
+        <button onclick="backToMenu()" class="back-btn">Back to Menu</button>
     </div>
 
     <div id="game" class="screen" style="display: none;">
         <div id="stats">
             <h1>Level: <span id="player-level">1</span></h1>
-            <p class="player">Player HP: <span id="player-hp">100</span>/<span id="player-max-hp">100</span> | ATK: <span id="player-atk">10</span> | Multiplier: <span id="player-multiplier">1.0x</span> | Coins: <span id="player-coins">0</span></p>
-            <p class="enemy">Enemy HP: <span id="enemy-hp">0</span> | ATK: <span id="enemy-atk">0</span> | Multiplier: <span id="enemy-multiplier">1.0x</span></p>
+            <p class="player">
+                Player HP: <span id="player-hp">100</span>/<span id="player-max-hp">100</span> | 
+                ATK: <span id="player-atk">10</span> | 
+                Multiplier: <span id="player-multiplier">1.0x</span> | 
+                Coins: <span id="player-coins">0</span>
+                <span class="tooltip">ℹ
+                    <span class="tooltiptext">
+                        Max HP: <span id="player-max-hp-info">100</span><br>
+                        ATK: <span id="player-atk-info">10</span><br>
+                        Multiplier: <span id="player-multiplier-info">1.0x</span><br>
+                        Crit Chance: <span id="player-crit-info">25%</span><br>
+                        Block Chance: <span id="player-block-info">0%</span><br>
+                        Dodge Chance: <span id="player-dodge-info">10%</span>
+                    </span>
+                </span>
+            </p>
+            <p class="enemy">
+                Enemy HP: <span id="enemy-hp">0</span> | 
+                ATK: <span id="enemy-atk">0</span> | 
+                Multiplier: <span id="enemy-multiplier">1.0x</span>
+                <span class="tooltip">ℹ
+                    <span class="tooltiptext">
+                        Max HP: <span id="enemy-max-hp-info">0</span><br>
+                        ATK: <span id="enemy-atk-info">0</span><br>
+                        Multiplier: <span id="enemy-multiplier-info">1.0x</span><br>
+                        Crit Chance: <span id="enemy-crit-info">0%</span><br>
+                        Block Chance: <span id="enemy-block-info">10%</span>
+                    </span>
+                </span>
+            </p>
         </div>
         <div id="battle-area">
             <div class="character-container">
@@ -77,8 +119,8 @@
                     <td><button onclick="buyItem('Armor Shard', 75, 'blockChance', 0.01)">Buy Armor Shard (+1% Block) - <span class="price">75</span> Coins</button></td>
                 </tr>
                 <tr>
-                    <td><img src="src/img/sword-shard.gif" alt="Sword Shard" class="shop-item-img"></td>
-                    <td><button onclick="buyItem('Sword Shard', 75, 'atk', 1)">Buy Sword Shard (+5 ATK) - <span class="price">75</span> Coins</button></td>
+                    <td><img src="src/img/sword-shard.gif" alt="Iron Sword" class="shop-item-img"></td>
+                    <td><button onclick="buyItem('Iron Sword', 75, 'atk', 5)">Buy Sword Shard (+5 ATK) - <span class="price">75</span> Coins</button></td>
                 </tr>
             </tbody>
             <tfoot>
