@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wanderer's Ascent</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="menu" class="screen">
+        <h1>Wanderer's Ascent</h1>
+        <img id="menu-logo" src="src/img/home_logo.webp" alt="Wanderer's Ascent Logo"> <br>
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="continueGame()">Continue</button>
+        <button onclick="showHighScore()">High Score</button>
+    </div>
+
+    <div id="game" class="screen" style="display: none;">
+        <div id="stats">
+            <h1>Level: <span id="player-level">1</span></h1>
+            <p class="player">Player HP: <span id="player-hp">100</span>/<span id="player-max-hp">100</span> | ATK: <span id="player-atk">10</span> | Multiplier: <span id="player-multiplier">1.0x</span> | Coins: <span id="player-coins">0</span></p>
+            <p class="enemy">Enemy HP: <span id="enemy-hp">0</span> | ATK: <span id="enemy-atk">0</span> | Multiplier: <span id="enemy-multiplier">1.0x</span></p>
+        </div>
+        <div id="battle-area">
+            <img id="player-img" src="src/img/player.jpg" alt="Player">
+            <img id="enemy-img" src="src/img/enemy1.jpg" alt="Enemy">
+        </div>
+        <div id="combat-log"></div>
+        <div id="actions">
+            <div class="action-group combat-actions">
+                <button onclick="attack()">Attack</button>
+                <button onclick="useItem()">Use Item</button>
+                <button onclick="flee()">Flee</button>
+            </div>
+            <div class="action-group utility-actions">
+                <button onclick="showInventory()">Show Inventory</button>
+                <button onclick="switchScreen(shopScreen)">Shop</button>
+                <button id="history-btn" onclick="toggleHistory()">Combat History</button>
+            </div>
+        </div>
+        <button onclick="backToMenu()" class="back-btn">Back to Menu</button>
+    </div>
+
+    <div id="shop" class="screen" style="display: none;">
+        <table id="shop-table">
+            <thead>
+                <tr>
+                    <th class="shop-title">SHOP</th>
+                    <th class="shop-coins">Coins: <span id="shop-coins">0</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><img src="src/img/minor-potion.gif" alt="Minor Potion" class="shop-item-img"></td>
+                    <td><button onclick="buyPotion('Minor Potion', 10, 20)">Buy Minor Potion (20 HP) - <span class="price">10</span> Coins</button></td>
+                </tr>
+                <tr>
+                    <td><img src="src/img/major-potion.gif" alt="Major Potion" class="shop-item-img"></td>
+                    <td><button onclick="buyPotion('Major Potion', 25, 50)">Buy Major Potion (50 HP) - <span class="price">25</span> Coins</button></td>
+                </tr>
+                <tr>
+                    <td><img src="src/img/crit-shard.gif" alt="Crit Sword" class="shop-item-img"></td>
+                    <td><button onclick="buyItem('Crit Shard', 30, 'critChance', 0.1)">Buy Crit Shard (+10% Crit) - <span class="price">30</span> Coins</button></td>
+                </tr>
+                <tr>
+                    <td><img src="src/img/armor-shard.gif" alt="Armor Shard" class="shop-item-img"></td>
+                    <td><button onclick="buyItem('Armor Shard', 40, 'blockChance', 0.1)">Buy Armor Shard (+10% Block) - <span class="price">40</span> Coins</button></td>
+                </tr>
+                <tr>
+                    <td><img src="src/img/sword-shard.gif" alt="Sword Shard" class="shop-item-img"></td>
+                    <td><button onclick="buyItem('Sword Shard', 50, 'atk', 5)">Buy Sword Shard (+5 ATK) - <span class="price">50</span> Coins</button></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><button onclick="switchScreen(gameScreen)" class="close-btn">Close</button></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div id="coin-animation"></div> <!-- Added for coin deduction animation -->
+    </div>
+
+    <div id="high-score" class="screen" style="display: none;">
+        <h1>High Score</h1>
+        <p>Highest Level: <span id="high-score-value">0</span></p>
+        <button onclick="backToMenu()">Back to Menu</button>
+    </div>
+
+    <div id="combat-history">
+        <h2>Combat History</h2>
+        <div id="history-content"></div>
+        <button onclick="toggleHistory()">Close</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
