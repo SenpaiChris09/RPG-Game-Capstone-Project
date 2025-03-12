@@ -200,9 +200,32 @@ function attack() {
     updateStats();
 }
 
-function enemyTurn() {
+function enemyTurn(dodged = false) {
+    const baseDodgeChance = 0.1; // 10% base dodge chance on normal attack
+
+    if (dodged) {
+        logMessage("Enemy swings but misses completely!");
+        setTimeout(() => attackButton.disabled = false, 1000); // Re-enable attack
+        updateStats();
+        return; // Skip damage calculation
+    }
+
     let enemyDamage = Math.floor(enemy.atk * enemy.multiplier);
-    if (Math.random() < player.blockChance) {
+    let damageTaken = true;
+
+    // Check dodge first (independent of block)
+    if (Math.random() < baseDodgeChance) {
+        logMessage("<b>You dodged the enemy's attack!</b> No damage taken!");
+        playerImg.style.animation = 'scaleUp 0.5s linear';
+        playerImg.classList.add('glow-yellow');
+        setTimeout(() => {
+            playerImg.style.animation = 'movePlayer 2s alternate';
+            playerImg.classList.remove('glow-yellow');
+        }, 500);
+        damageTaken = false;
+    }
+    // If dodge fails, check block
+    else if (Math.random() < player.blockChance) {
         enemyDamage = Math.floor(enemyDamage / 2);
         logMessage(`<b>You blocked the enemy's attack!</b> Enemy deals <i>${enemyDamage}</i> damage.`);
         playerImg.style.animation = 'scaleUp 0.5s linear';
@@ -211,14 +234,20 @@ function enemyTurn() {
             playerImg.style.animation = 'movePlayer 2s alternate';
             playerImg.classList.remove('glow-yellow');
         }, 500);
-    } else {
+    }
+    // Neither dodge nor block
+    else {
         logMessage(`Enemy deals <b>${enemyDamage}</b> damage to you!`);
         playerImg.classList.add('glow-red');
         setTimeout(() => {
             playerImg.classList.remove('glow-red');
         }, 500);
     }
-    player.hp -= enemyDamage;
+
+    // Apply damage only if neither dodge nor block succeeded
+    if (damageTaken) {
+        player.hp -= enemyDamage;
+    }
 
     if (player.hp <= 0) {
         logMessage("You have been defeated!");
@@ -265,16 +294,32 @@ function useItem() {
     updateStats();
 }
 
-function flee() {
-    if (Math.random() < 0.5) {
-        logMessage("You fled successfully! Healed 20 HP.");
-        player.hp = Math.min(player.hp + 20, player.maxHp);
-        enemy = null;
-        setTimeout(startCombat, 2000);
+function defend() {
+    const dodgeChance = 0.5; // 50% chance to dodge
+    const bonusBlockChance = 0.2; // +20% block chance if dodge fails
+
+    if (Math.random() < dodgeChance) {
+        logMessage("<b>You dodged the enemy's attack!</b> No damage taken!");
+        playerImg.style.animation = 'scaleUp 0.5s linear'; // Visual feedback
+        playerImg.classList.add('glow-yellow');
+        setTimeout(() => {
+            playerImg.style.animation = 'movePlayer 2s alternate';
+            playerImg.classList.remove('glow-yellow');
+        }, 500);
+        setTimeout(enemyTurn, 1000, true); // Pass flag to skip damage
     } else {
-        logMessage("Failed to flee!");
-        setTimeout(enemyTurn, 1000);
+        logMessage("Dodge failed! <b>Blocking stance activated</b> (+20% block chance).");
+        player.blockChance += bonusBlockChance; // Temporarily increase block chance
+        playerImg.style.animation = 'scaleUp 0.5s linear';
+        playerImg.classList.add('glow-green');
+        setTimeout(() => {
+            playerImg.style.animation = 'movePlayer 2s alternate';
+            playerImg.classList.remove('glow-green');
+            player.blockChance -= bonusBlockChance; // Reset after enemy turn
+        }, 1500); // Longer delay to show effect
+        setTimeout(enemyTurn, 1000, false); // Normal enemy turn
     }
+    updateStats();
 }
 
 function dropLoot() {
