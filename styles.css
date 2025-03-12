@@ -265,13 +265,46 @@ button:hover {
     width: 100%;
     margin-bottom: 20px;
     overflow: hidden;
+    display: flex; /* Enable flexbox */
+    justify-content: space-between; /* Space player and enemy containers */
+    align-items: center; /* Vertically center the containers */
+}
+
+.character-container {
+    position: relative; /* Container is the positioning context */
+    width: 120px; /* Fixed width to contain image + padding */
+    height: 150px; /* Fixed height to contain image + padding + GIF */
+    text-align: center; /* Center contents */
 }
 
 #player-img, #enemy-img {
-    position: absolute;
+    position: relative; /* Changed from absolute to stay within container */
     height: 100px;
     width: auto;
-    padding: 25px 0 10px 0;
+    padding: 25px 10px 10px 10px; /* Keep your padding */
+    display: block; /* Ensure it behaves as a block element */
+}
+
+.player-effect-gif {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%;
+    transform: translate(50%, -50%); /* Center horizontally and vertically Pakanan and rotate */
+    width: 200px; /* Adjust based on your GIF size */
+    height: auto;
+    z-index: 10; /* Ensure it’s above the character */
+    pointer-events: none; /* Prevent interaction */
+}
+
+.enemy-effect-gif {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%;
+    transform: translate(-140%, -50%); /* Center horizontally and vertically Pakaliwa*/
+    width: 200px; /* Adjust based on your GIF size */
+    height: auto;
+    z-index: 10; /* Ensure it’s above the character */
+    pointer-events: none; /* Prevent interaction */
 }
 
 #player-img {

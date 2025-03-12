@@ -5,7 +5,7 @@ let player = {
     atk: 10,
     multiplier: 1.0,
     critChance: 0.25,
-    blockChance: 0.0,
+    blockChance: 0.0, // Base starts at 0, scales with level/items
     level: 1,
     coins: 0,
     inventory: []
@@ -17,6 +17,7 @@ let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getIte
 let savedGame = null;
 let combatLogQueue = []; // Queue for delayed messages
 let fullCombatHistory = []; // Store all log entries
+let defendCooldown = false; // New flag for defend cooldown
 
 // DOM elements
 const menuScreen = document.getElementById('menu');
@@ -30,6 +31,8 @@ const attackButton = document.querySelector('#actions button[onclick="attack()"]
 const combatHistory = document.getElementById('combat-history');
 const historyContent = document.getElementById('history-content');
 const coinAnimation = document.getElementById('coin-animation'); // Added for coin animation
+const playerEffect = document.getElementById('player-effect'); // New for GIFs
+const enemyEffect = document.getElementById('enemy-effect'); // New for GIFs
 
 // Enemy image array
 const enemyImages = [
@@ -39,6 +42,19 @@ const enemyImages = [
     "src/img/enemy4.jpg",
     "src/img/enemy5.jpg"
 ];
+
+// Updated generateEnemy with scaling
+function generateEnemy(level) {
+    const hpScaling = 50 + 10 * level + Math.floor(level * level * 0.1); // Slower HP growth
+    const atkScaling = 5 + Math.floor(level * 1.5); // Reduced ATK growth
+    const multiplierScaling = 0.9 + Math.min(0.02 * level, 1.0); // Caps at 1.9x
+    return {
+        hp: hpScaling,
+        atk: atkScaling,
+        multiplier: multiplierScaling
+    };
+}
+
 
 // Menu Functions
 function startGame() {
@@ -75,10 +91,10 @@ function resetPlayerStats() {
     player = {
         hp: 100,
         maxHp: 100,
-        atk: 10,
-        multiplier: 1.0,
-        critChance: 0.25,
-        blockChance: 0.0,
+        atk: 10, // Base attack
+        multiplier: 1.0, // Base damage multiplier
+        critChance: 0.25, // Base crit chance
+        blockChance: 0.1, // Base block chance
         level: 1,
         coins: 0,
         inventory: []
@@ -133,14 +149,6 @@ function updateShopPrices() {
     });
 }
 
-function generateEnemy(level) {
-    return {
-        hp: 50 + 10 * level,
-        atk: 5 + 2 * level,
-        multiplier: 0.9 + 0.1 * level
-    };
-}
-
 function startCombat() {
     enemy = generateEnemy(player.level);
     const enemyIndex = (player.level - 1) % enemyImages.length;
@@ -162,20 +170,24 @@ function attack() {
         logMessage("<b>Critical hit!</b>");
         enemyImg.style.animation = 'vibrate 0.5s linear';
         enemyImg.classList.add('glow-red');
+        showEffect(enemyEffect, 'crit'); // Show crit GIF
         setTimeout(() => {
             enemyImg.style.animation = 'moveEnemy 2s alternate';
             enemyImg.classList.remove('glow-red');
-        }, 500);
+            hideEffect(enemyEffect);
+        }, 2000);
     }
     if (Math.random() < 0.1) {
         damage = Math.floor(damage / 2);
         logMessage(`<b>Enemy blocked your attack!</b> You deal <b>${damage}</b> damage.`);
         enemyImg.style.animation = 'scaleUp 0.5s linear';
         enemyImg.classList.add('glow-yellow');
+        showEffect(enemyEffect, 'block'); // Show block GIF
         setTimeout(() => {
             enemyImg.style.animation = 'moveEnemy 2s alternate';
             enemyImg.classList.remove('glow-yellow');
-        }, 500);
+            hideEffect(enemyEffect);
+        }, 3000);
     } else {
         logMessage(`You deal <b>${damage}</b> damage to the enemy!`);
         enemyImg.classList.add('glow-red');
@@ -192,6 +204,27 @@ function attack() {
         player.maxHp += 10;
         player.hp = player.maxHp;
         logMessage("Max HP Increased by 10! Healed to full HP.");
+        playerImg.classList.add('glow-green');
+        setTimeout(() => playerImg.classList.remove('glow-green'), 500);
+
+        // Randomly boost 3 stats
+        const statUpgrades = [
+            { stat: 'atk', value: 1 + (Math.floor(Math.random() * 3)) , message: "ATK Up! ⚔️" },
+            { stat: 'multiplier', value: 0.01 + (Math.floor(Math.random()*100)/1000), message: "Multiplier up! 💎" },
+            { stat: 'critChance', value: 0.01 + (Math.floor(Math.random()*100)/1000), message: "Crit Chance up! ⚜️" },
+            { stat: 'blockChance', value: 0.01 + (Math.floor(Math.random()*100)/1000), message: "Block Chance up! 🛡️" }
+        ];
+
+        // Shuffle and pick 3 random stats
+        const shuffledStats = statUpgrades.sort(() => Math.random() - 0.5); // Simple shuffle
+        const selectedStats = shuffledStats.slice(0, 3); // Take first 3
+
+        // Apply and log the boosts
+        selectedStats.forEach(upgrade => {
+            player[upgrade.stat] += upgrade.value;
+            logMessage(upgrade.message);
+        });
+
         saveGame();
         setTimeout(startCombat, 2000); // Increased delay to account for messages
     } else {
@@ -201,8 +234,8 @@ function attack() {
 }
 
 function enemyTurn(dodged = false) {
-    const baseDodgeChance = 0.1; // 10% base dodge chance on normal attack
-
+    const baseDodgeChance = Math.min(0.1 + player.level * 0.002, 0.3); // 10% + 0.2% per level, max 30%
+    
     if (dodged) {
         logMessage("Enemy swings but misses completely!");
         setTimeout(() => attackButton.disabled = false, 1000); // Re-enable attack
@@ -218,10 +251,12 @@ function enemyTurn(dodged = false) {
         logMessage("<b>You dodged the enemy's attack!</b> No damage taken!");
         playerImg.style.animation = 'scaleUp 0.5s linear';
         playerImg.classList.add('glow-yellow');
+        showEffect(playerEffect, 'dodge'); // Show dodge GIF
         setTimeout(() => {
             playerImg.style.animation = 'movePlayer 2s alternate';
             playerImg.classList.remove('glow-yellow');
-        }, 500);
+            hideEffect(playerEffect);
+        }, 2000);
         damageTaken = false;
     }
     // If dodge fails, check block
@@ -230,10 +265,12 @@ function enemyTurn(dodged = false) {
         logMessage(`<b>You blocked the enemy's attack!</b> Enemy deals <i>${enemyDamage}</i> damage.`);
         playerImg.style.animation = 'scaleUp 0.5s linear';
         playerImg.classList.add('glow-yellow');
+        showEffect(playerEffect, 'block'); // Show block GIF
         setTimeout(() => {
             playerImg.style.animation = 'movePlayer 2s alternate';
             playerImg.classList.remove('glow-yellow');
-        }, 500);
+            hideEffect(playerEffect);
+        }, 3000);
     }
     // Neither dodge nor block
     else {
@@ -294,32 +331,69 @@ function useItem() {
     updateStats();
 }
 
+// Updated defend function with cooldown and scaling
 function defend() {
-    const dodgeChance = 0.5; // 50% chance to dodge
-    const bonusBlockChance = 0.2; // +20% block chance if dodge fails
+    if (defendCooldown) {
+        logMessage("Defend is on cooldown!");
+        return;
+    }
 
-    if (Math.random() < dodgeChance) {
+    const levelScaledDodge = Math.min(0.5 + player.level * 0.005, 0.75); // 50% + 0.5% per level, max 75%
+    const bonusBlockChance = Math.min(0.2 + player.level * 0.002, 0.4); // 20% + 0.2% per level, max 40%
+
+    if (Math.random() < levelScaledDodge) {
         logMessage("<b>You dodged the enemy's attack!</b> No damage taken!");
-        playerImg.style.animation = 'scaleUp 0.5s linear'; // Visual feedback
+        playerImg.style.animation = 'scaleUp 0.5s linear';
         playerImg.classList.add('glow-yellow');
+        showEffect(playerEffect, 'dodge'); // Show dodge GIF
         setTimeout(() => {
             playerImg.style.animation = 'movePlayer 2s alternate';
             playerImg.classList.remove('glow-yellow');
-        }, 500);
-        setTimeout(enemyTurn, 1000, true); // Pass flag to skip damage
+            hideEffect(playerEffect);
+        }, 2000);
+        setTimeout(enemyTurn, 1000, true);
     } else {
-        logMessage("Dodge failed! <b>Blocking stance activated</b> (+20% block chance).");
-        player.blockChance += bonusBlockChance; // Temporarily increase block chance
+        logMessage(`Dodge failed! <b>Blocking stance activated</b> (+${(bonusBlockChance * 100).toFixed(0)}% block chance).`);
+        player.blockChance += bonusBlockChance;
         playerImg.style.animation = 'scaleUp 0.5s linear';
         playerImg.classList.add('glow-green');
+        showEffect(playerEffect, 'block'); // Show block GIF
         setTimeout(() => {
             playerImg.style.animation = 'movePlayer 2s alternate';
             playerImg.classList.remove('glow-green');
-            player.blockChance -= bonusBlockChance; // Reset after enemy turn
-        }, 1500); // Longer delay to show effect
-        setTimeout(enemyTurn, 1000, false); // Normal enemy turn
+            player.blockChance -= bonusBlockChance;
+            hideEffect(playerEffect);
+        }, 1500);
+        setTimeout(enemyTurn, 1000, false);
     }
+
+    // Set cooldown
+    defendCooldown = true;
+    defendButton.disabled = true;
+    defendButton.style.opacity = '0.5'; // Visual feedback
+    setTimeout(() => {
+        defendCooldown = false;
+        defendButton.disabled = false;
+        defendButton.style.opacity = '1';
+    }, 1000); // 1s cooldown (1 turn)
+
     updateStats();
+}
+
+// New functions for effect visuals
+function showEffect(element, type) {
+    if (type === 'dodge') {
+        element.src = 'src/img/dodge.gif'; // Replace with your dodge GIF
+    } else if (type === 'block') {
+        element.src = 'src/img/block.gif'; // Replace with your block GIF
+    } else if (type === 'crit') {
+        element.src = 'src/img/crit.gif'; // Replace with your crit GIF
+    }
+    element.style.display = 'block';
+}
+
+function hideEffect(element) {
+    element.style.display = 'none';
 }
 
 function dropLoot() {
@@ -328,23 +402,25 @@ function dropLoot() {
     logMessage(`Enemy dropped ${coinsDropped} coins!`);
 
     const lootTable = [
-        "Sword Fragment", "Sword Fragment", "Sword Fragment",
-        "Vitality Shard", "Vitality Shard", "Vitality Shard",
-        "Divine Rapier",
-        "Heart of Tarasque",
-        "Multiplier Gem",
-        "Mid Multiplier Gem",
-        "Crit Shard",
-        "Shield Fragment"
+        "Sword Fragment", "Sword Fragment", "Sword Fragment", "Sword Fragment", "Sword Fragment", "Sword Fragment",
+        "Vitality Shard", "Vitality Shard", "Vitality Shard", "Vitality Shard", "Vitality Shard", "Vitality Shard",
+        "Divine Rapier", "Divine Rapier",
+        "Heart of Tarasque", "Heart of Tarasque",
+        "Multiplier Gem", "Multiplier Gem", "Multiplier Gem", "Multiplier Gem", "Multiplier Gem", "Multiplier Gem",
+        "Mid Multiplier Gem", "Mid Multiplier Gem",
+        "Crit Shard", "Crit Shard", "Crit Shard", "Crit Shard", "Crit Shard", "Crit Shard", 
+        "Desolator", "Desolator", 
+        "Shield Fragment", "Shield Fragment" ,"Shield Fragment" ,"Shield Fragment" ,"Shield Fragment",
+        "Vanguard", "Vanguard"
     ];
     const loot = lootTable[Math.floor(Math.random() * lootTable.length)];
 
     if (loot === "Sword Fragment") {
-        player.atk += 5;
-        logMessage("Enemy dropped a Sword Fragment! ⚔️ ATK +5");
+        player.atk += 1;
+        logMessage("Enemy dropped a Sword Fragment! ⚔️ ATK +1");
     } else if (loot === "Divine Rapier") {
-        player.atk += 10;
-        logMessage("Enemy dropped a Divine Rapier! ⚔️ ATK +10");
+        player.atk += 5;
+        logMessage("Enemy dropped a Divine Rapier! ⚔️ ATK +5");
     } else if (loot === "Vitality Shard") {
         player.inventory.push(loot);
         logMessage("Enemy dropped a Vitality Shard! 💟 ");
@@ -352,18 +428,26 @@ function dropLoot() {
         player.inventory.push(loot);
         logMessage("Enemy dropped a Heart of Tarasque! 💖");
     } else if (loot === "Multiplier Gem") {
-        player.multiplier += 0.5;
-        logMessage("Enemy dropped a Multiplier Gem! 💎 Multiplier +0.5x");
+        player.multiplier += 0.01;
+        logMessage("Enemy dropped a Multiplier Gem! 💎 Multiplier +0.02x");
     } else if (loot === "Mid Multiplier Gem") {
-        player.multiplier += 0.8;
-        logMessage("Enemy dropped a Mid Multiplier Gem! ‧₊˚💎✩ ₊˚ Multiplier +0.8x");
+        player.multiplier += 0.05;
+        logMessage("Enemy dropped a Mid Multiplier Gem! ‧₊˚💎✩ ₊˚ Multiplier +0.05x");
     } else if (loot === "Crit Shard") {
-        player.critChance += 0.1;
-        logMessage(`Enemy dropped a Crit Shard! ⚜️ Crit Chance +10% (Now ${(player.critChance * 100).toFixed(0)}%)`);
+        player.critChance += 0.01;
+        logMessage(`Enemy dropped a Crit Shard! ⚜️ Crit Chance +1% (Now ${(player.critChance * 100).toFixed(0)}%)`);
+    } else if (loot === "Desolator") {
+        player.critChance += 0.05;
+        logMessage(`Enemy dropped a Desolator! ⚜️ Crit Chance +5% (Now ${(player.critChance * 100).toFixed(0)}%)`);
     } else if (loot === "Shield Fragment") {
-        player.blockChance += 0.1;
-        logMessage(`Enemy dropped a Shield Fragment! 🛡️ Block Chance +10% (Now ${(player.blockChance * 100).toFixed(0)}%)`);
+        player.blockChance += 0.01;
+        logMessage(`Enemy dropped a Shield Fragment! 🛡️ Block Chance +1% (Now ${(player.blockChance * 100).toFixed(0)}%)`);
+    } else if (loot === "Vanguard") {
+        player.blockChance += 0.05;
+        logMessage(`Enemy dropped a Vanguard! 🛡️ Block Chance +5% (Now ${(player.blockChance * 100).toFixed(0)}%)`);
     }
+    
+    
 }
 
 function buyPotion(potionName, cost, healAmount) {
