@@ -1,0 +1,88 @@
+/* shop.css */
+#shop-table {
+    width: 400px;
+    background-color: rgba(240, 248, 255, 0.95);
+    border: 6px solid transparent;
+    border-image: url('src/img/fantasy-border.jpg') 30 stretch;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.shop-title {
+    text-align: left;
+    font-family: 'Georgia', serif;
+    color: #4CAF50;
+    font-size: 24px;
+    padding: 10px;
+}
+
+.shop-coins {
+    text-align: right;
+    font-size: 18px;
+    color: #4CAF50;
+    padding: 10px;
+}
+
+.shop-item-img {
+    width: 50px;
+    height: auto;
+    margin: 5px;
+    border-radius: 5px;
+    border: 2px solid #4CAF50;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.shop-item-img:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 5px #4CAF50);
+}
+
+#shop-table td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+#shop-table button {
+    padding: 8px 15px;
+    font-size: 14px;
+}
+
+.price {
+    font-weight: bold;
+}
+
+.price.insufficient {
+    color: red;
+}
+
+.price.sufficient {
+    color: #f9f9f9;
+}
+
+.close-btn {
+    background-color: #f44336;
+    width: 100%;
+    padding: 10px;
+    margin: 0;
+}
+
+.close-btn:hover {
+    background-color: #da190b;
+}
+
+#coin-animation {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.coin-deduction {
+    color: red;
+    font-size: 18px;
+    font-weight: bold;
+    position: absolute;
+    animation: coinDrop 1s ease-in-out forwards;
+}

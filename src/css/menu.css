@@ -1,0 +1,36 @@
+/* menu.css */
+#menu {
+    background-color: rgba(240, 248, 255, 0.95);
+    border: 6px solid transparent;
+    border-image: url('/RPG-Game-Capstone-Project/src/img/fantasy-border.jpg') 30 stretch;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 1s ease-in;
+}
+
+#menu h1 {
+    font-family: 'Georgia', serif;
+    color: #4CAF50;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    animation: glow 2s infinite alternate;
+}
+
+#menu-logo {
+    width: 150px;
+    height: auto;
+    margin: 10px 0;
+    border-radius: 50%;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    animation: spin 10s linear infinite;
+    perspective: 1000px;
+    transition: animation-play-state 0.2s ease, transform 0.5s ease;
+    cursor: pointer;
+    transform-style: preserve-3d;
+}
+
+#menu-logo:hover {
+    animation-play-state: paused;
+}

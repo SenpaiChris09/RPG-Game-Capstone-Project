@@ -1,0 +1,88 @@
+/* base.css */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: url('/RPG-Game-Capstone-Project/src/img/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    backdrop-filter: blur(3px);
+}
+
+.screen {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+    position: relative;
+}
+
+.screen.fade-out {
+    opacity: 0;
+}
+
+.screen.fade-in {
+    opacity: 1;
+}
+
+/* Shared Animations */
+@keyframes movePlayer {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes moveEnemy {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes vibrate {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-25px); }
+    40% { transform: translateX(25px); }
+    60% { transform: translateX(-25px); }
+    80% { transform: translateX(25px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes glowRed {
+    0% { filter: drop-shadow(0 0 15px red); }
+    20% { filter: drop-shadow(0 0 25px red); }
+    40% { filter: drop-shadow(0 0 15px red); }
+    60% { filter: drop-shadow(0 0 25px red); }
+    80% { filter: drop-shadow(0 0 15px red); }
+    100% { filter: drop-shadow(0 0 25px red); }
+}
+
+@keyframes scaleUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes glow {
+    0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), 0 0 5px rgba(76, 175, 80, 0.5); }
+    100% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), 0 0 10px rgba(76, 175, 80, 0.8); }
+}
+
+@keyframes spin {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+}
+
+@keyframes coinDrop {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}

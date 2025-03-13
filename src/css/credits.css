@@ -1,0 +1,46 @@
+/* credits.css */
+#credits {
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    position: fixed;
+    width: 25vw;
+    height: 65vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 10;
+}
+
+#credits-content {
+    position: relative;
+    bottom: -100%;
+    width: auto;
+    max-width: 50vw;
+    text-align: center;
+    padding: 20px;
+    animation: rollUp 15s linear forwards;
+}
+
+#credits-content h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+#credits-content p {
+    margin: 15px 0;
+    font-size: 16px;
+}
+
+#credits-content strong {
+    color: #FFD700;
+}
+
+@keyframes rollUp {
+    0% { bottom: -100%; }
+    100% { bottom: 0%; }
+}
