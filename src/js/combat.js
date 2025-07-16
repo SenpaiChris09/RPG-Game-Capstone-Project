@@ -1,6 +1,6 @@
 // combat.js
 function generateEnemy(level) {
-    const hpScaling = 75 + 5 * level + Math.floor(level * level * 0.1);
+    const hpScaling = 75 + 5 * level + Math.floor(level * level * 0.50);
     const atkScaling = 5 + Math.floor(level * 1.5);
     const multiplierScaling = 0.9 + Math.min(0.02 * level, 1.0);
     

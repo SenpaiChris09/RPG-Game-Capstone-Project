@@ -6,7 +6,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background: url('/RPG-Game-Capstone-Project/src/img/background.jpg') no-repeat center center fixed;
+    background: url('/src/img/background.jpg') no-repeat center center fixed;
     background-size: cover;
     backdrop-filter: blur(3px);
 }

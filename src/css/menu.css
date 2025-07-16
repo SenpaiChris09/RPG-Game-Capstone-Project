@@ -2,7 +2,7 @@
 #menu {
     background-color: rgba(240, 248, 255, 0.95);
     border: 6px solid transparent;
-    border-image: url('/RPG-Game-Capstone-Project/src/img/fantasy-border.jpg') 30 stretch;
+    border-image: url('/src/img/fantasy-border.jpg') 30 stretch;
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
